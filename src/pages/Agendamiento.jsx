@@ -12,6 +12,15 @@ export default function Agendamiento() {
   const [horasDisponibles, setHorasDisponibles] = useState([]);
   const [hora, setHora] = useState("");
   const [error, setError] = useState("");
+  const [mensaje, setMensaje] = useState("");
+
+  // tintes
+  const [tintes, setTintes] = useState([]);
+  const [tintesSeleccionados, setTintesSeleccionados] = useState([]);
+
+  // usuario desde sesión
+  const session = JSON.parse(localStorage.getItem("session"));
+  const usuario_id = session?.user?.id;
 
   // Cargar diseño
   useEffect(() => {
@@ -30,16 +39,17 @@ export default function Agendamiento() {
     fetchDiseno();
   }, [diseno_id]);
 
-  // Obtener horas disponibles cuando cambia la fecha
+  // Obtener horas disponibles
   useEffect(() => {
     if (!fecha) return;
     const fetchHoras = async () => {
       try {
         setError("");
-        setHora(""); // reset hora cuando cambia fecha
-        const res = await fetch(`http://127.0.0.1:8000/agendamiento/horas_disponibles?fecha=${fecha}`);
+        setHora("");
+        const res = await fetch(
+          `http://127.0.0.1:8000/agendamiento/horas_disponibles?fecha=${fecha}`
+        );
         const data = await res.json();
-        console.log(data);
         if (!res.ok) throw new Error(data.detail || "Error al obtener horas disponibles");
         setHorasDisponibles(data.horas);
         if (data.horas.length === 0) setError("No hay horarios disponibles para esta fecha");
@@ -51,10 +61,25 @@ export default function Agendamiento() {
     fetchHoras();
   }, [fecha]);
 
+  // Obtener tintes
+  useEffect(() => {
+    const fetchTintes = async () => {
+      try {
+        const res = await fetch(`http://127.0.0.1:8000/diseno/get_tintes`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al obtener tintes");
+        setTintes(data.tintes);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchTintes();
+  }, []);
+
   if (loading) return <p className="p-6 text-gray-600">Cargando diseño...</p>;
   if (!diseno) return <p className="p-6 text-red-500">No se encontró el diseño</p>;
 
-  // Función para deshabilitar domingos y días pasados
+  // deshabilitar domingos y días pasados
   const minDate = new Date().toISOString().split("T")[0];
 
   const handleFechaChange = (e) => {
@@ -69,6 +94,59 @@ export default function Agendamiento() {
     }
   };
 
+  const seleccionarTinte = (tinte) => {
+    const yaSeleccionado = tintesSeleccionados.some((t) => t.id === tinte.id);
+
+    if (yaSeleccionado) {
+      setTintesSeleccionados((prev) => prev.filter((t) => t.id !== tinte.id));
+    } else {
+      if (tintesSeleccionados.length < diseno.max_tintes) {
+        setTintesSeleccionados((prev) => [...prev, tinte]);
+      }
+    }
+  };
+
+  // 👉 función para enviar al backend
+  const handleAgendar = async () => {
+    try {
+      setMensaje("");
+
+      if (!usuario_id || !fecha || !hora) {
+        setMensaje("❌ Faltan datos obligatorios.");
+        return;
+      }
+
+      const body = {
+        usuario_id,
+        diseno_id, // asegurar que va como número
+        fecha,
+        hora,
+        tintes_ids: tintesSeleccionados.map((t) => t.id), // 👈 ahora siempre mandamos tintes
+        max_tintes: diseno.max_tintes, // enviar el máximo permitido
+      };
+
+      console.log("Payload enviado:", body);
+
+      const res = await fetch("http://127.0.0.1:8000/agendamiento/crear_agendamiento", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.detail || "Error al crear agendamiento");
+
+      setMensaje(`✅ Agendamiento creado`);
+      // opcional: redirigir después de 2 segs
+      // setTimeout(() => navigate("/home"), 2000);
+      setTimeout(()=>navigate("/home"),2000)
+    } catch (err) {
+      console.error(err);
+      setMensaje("❌ " + err.message);
+    }
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto">
       {/* Botón atrás */}
@@ -80,10 +158,14 @@ export default function Agendamiento() {
       </button>
 
       <div className="grid grid-cols-3 gap-6 mt-6">
-        {/* Columna izquierda: Imagen + info */}
+        {/* Columna izquierda: diseño */}
         <div className="border rounded-lg p-4">
           <div className="flex justify-center">
-            <img src={diseno.imagen} alt={diseno.nombre} className="w-32 h-32 object-cover rounded-full border" />
+            <img
+              src={diseno.imagen}
+              alt={diseno.nombre}
+              className="w-32 h-32 object-cover rounded-full border"
+            />
           </div>
           <div className="mt-4 space-y-1 text-sm text-gray-700">
             <p><strong>Nombre:</strong> {diseno.nombre}</p>
@@ -93,7 +175,7 @@ export default function Agendamiento() {
           </div>
         </div>
 
-        {/* Columna central: fecha/hora/agendar */}
+        {/* Columna central: fecha y hora */}
         <div className="flex flex-col space-y-4">
           <input
             type="date"
@@ -118,26 +200,71 @@ export default function Agendamiento() {
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
           <button
+            onClick={handleAgendar}
             disabled={!fecha || !hora}
             className="bg-blue-500 text-white rounded-full px-6 py-2 hover:bg-blue-600 disabled:bg-gray-400"
           >
             Agendar
           </button>
+
+          {mensaje && <p className="text-sm mt-2">{mensaje}</p>}
         </div>
 
         {/* Columna derecha: tintes */}
         <div className="space-y-4">
           <div className="border rounded-lg p-4 text-sm">
             <p><strong>Seleccionar tintes</strong></p>
+            <p className="text-xs text-gray-500">
+              {tintesSeleccionados.length} / {diseno.max_tintes} seleccionados
+            </p>
+
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              {tintes.map((t) => {
+                const seleccionado = tintesSeleccionados.some((sel) => sel.id === t.id);
+                const limiteAlcanzado = tintesSeleccionados.length >= diseno.max_tintes;
+
+                return (
+                  <div
+                    key={t.id}
+                    onClick={() => {
+                      if (!seleccionado && limiteAlcanzado) return;
+                      seleccionarTinte(t);
+                    }}
+                    className={`border rounded-md p-2 flex flex-col items-center 
+                      ${seleccionado ? "border-blue-500 bg-blue-50" : "hover:bg-gray-100"} 
+                      ${!seleccionado && limiteAlcanzado ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+                  >
+                    <img
+                      src={t.imagen}
+                      alt={t.nombre}
+                      className="w-16 h-16 object-cover rounded-full"
+                    />
+                    <p className="mt-1 text-xs">{t.nombre}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           <div className="border rounded-lg p-4 text-sm">
             <p><strong>Tintes seleccionados:</strong></p>
             <ul className="mt-2 space-y-1">
-              <li className="flex justify-between items-center">
-                <span>Tinte 1</span>
-                <button className="text-red-500">x</button>
-              </li>
+              {tintesSeleccionados.map((t) => (
+                <li key={t.id} className="flex justify-between items-center">
+                  <span>{t.nombre}</span>
+                  <button
+                    onClick={() =>
+                      setTintesSeleccionados((prev) => prev.filter((sel) => sel.id !== t.id))
+                    }
+                    className="text-red-500"
+                  >
+                    x
+                  </button>
+                </li>
+              ))}
+              {tintesSeleccionados.length === 0 && (
+                <li className="text-gray-400">Ningún tinte seleccionado</li>
+              )}
             </ul>
           </div>
         </div>
