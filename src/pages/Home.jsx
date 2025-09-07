@@ -17,14 +17,14 @@ export default function Home() {
 
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/user/get_user_name/${session.user.id}`
+          `https://beautyangelsbackend.onrender.com/user/get_user_name/${session.user.id}`
         );
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Error al obtener usuario");
 
         setUserName(data.nombre);
 
-        const resDisenos = await fetch("http://127.0.0.1:8000/diseno/get_disenos");
+        const resDisenos = await fetch("https://beautyangelsbackend.onrender.com/diseno/get_disenos");
         const dataDisenos = await resDisenos.json();
         if (!resDisenos.ok) throw new Error(dataDisenos.detail || "Error al obtener diseños");
 

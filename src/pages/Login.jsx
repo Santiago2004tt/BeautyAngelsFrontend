@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API = "http://127.0.0.1:8000"; // tu backend
+const API = "https://beautyangelsbackend.onrender.com"; // tu backend
 
 export default function Login() {
   const [email, setEmail] = useState("");
