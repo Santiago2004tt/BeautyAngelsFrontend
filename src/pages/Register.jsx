@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
+  const API = "https://beautyangelsbackend.onrender.com"
   const navigate = useNavigate();
   const [form, setForm] = useState({
     email: "",
@@ -17,7 +18,7 @@ export default function Register() {
   const handleSubmit = async (e) => {
   e.preventDefault();
   try {
-    const res = await fetch("https://beautyangelsbackend.onrender.com/auth/register_user", {
+    const res = await fetch(`${API}/auth/register_user`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),

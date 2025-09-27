@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Home() {
+  const API = "https://beautyangelsbackend.onrender.com"
   const [userName, setUserName] = useState("");
   const [disenos, setDisenos] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -18,7 +19,7 @@ export default function Home() {
 
       try {
         const res = await fetch(
-          `https://beautyangelsbackend.onrender.com/user/get_user_name/${session.user.id}`
+          `${API}/user/get_user_name/${session.user.id}`
         );
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Error al obtener usuario");
@@ -26,7 +27,7 @@ export default function Home() {
         setUserName(data.nombre);
 
         const resDisenos = await fetch(
-          "https://beautyangelsbackend.onrender.com/diseno/get_disenos"
+          `${API}/diseno/get_disenos`
         );
         const dataDisenos = await resDisenos.json();
         if (!resDisenos.ok) throw new Error(dataDisenos.detail || "Error al obtener diseños");

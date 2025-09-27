@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { API } from "../config";
+
 
 export default function Agendamiento() {
   const navigate = useNavigate();
@@ -26,7 +28,7 @@ export default function Agendamiento() {
   useEffect(() => {
     const fetchDiseno = async () => {
       try {
-        const res = await fetch(`https://beautyangelsbackend.onrender.com/diseno/get_diseno/${diseno_id}`);
+        const res = await fetch(`${API}/diseno/get_diseno/${diseno_id}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Error al obtener diseño");
         setDiseno(data.diseno);
@@ -47,7 +49,7 @@ export default function Agendamiento() {
         setError("");
         setHora("");
         const res = await fetch(
-          `https://beautyangelsbackend.onrender.com/agendamiento/horas_disponibles?fecha=${fecha}`
+          `${API}/agendamiento/horas_disponibles?fecha=${fecha}`
         );
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Error al obtener horas disponibles");
@@ -65,7 +67,7 @@ export default function Agendamiento() {
   useEffect(() => {
     const fetchTintes = async () => {
       try {
-        const res = await fetch(`https://beautyangelsbackend.onrender.com/diseno/get_tintes`);
+        const res = await fetch(`${API}/diseno/get_tintes`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Error al obtener tintes");
         setTintes(data.tintes);
@@ -127,7 +129,7 @@ export default function Agendamiento() {
 
       console.log("Payload enviado:", body);
 
-      const res = await fetch("https://beautyangelsbackend.onrender.com/agendamiento/crear_agendamiento", {
+      const res = await fetch(`${API}/agendamiento/crear_agendamiento`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
