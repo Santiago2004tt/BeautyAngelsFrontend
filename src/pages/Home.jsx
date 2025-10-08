@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API } from "../config";
 
 export default function Home() {
-  const API = "https://beautyangelsbackend.onrender.com"
   const [userName, setUserName] = useState("");
   const [disenos, setDisenos] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);

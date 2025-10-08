@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API } from "../config";
 
-const API = "https://beautyangelsbackend.onrender.com"; // tu backend
+
 
 export default function Login() {
   const [email, setEmail] = useState("");
