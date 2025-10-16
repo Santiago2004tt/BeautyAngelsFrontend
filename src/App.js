@@ -4,6 +4,10 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Inicio from "./pages/Inicio";
 import Agendamiento from "./pages/Agendamiento";
+import Validacion from "./pages/Validacion";
+import Perfil from "./pages/Perfil";
+import Historial from "./pages/Historial";
+
 
 export default function App() {
   return (
@@ -14,6 +18,10 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/agendamiento/:diseno_id" element={<Agendamiento />} />
+        <Route path="/validacion" element={<Validacion />} />
+        <Route path="/perfil" element={<Perfil />} />
+        <Route path="/historial" element={<Historial />} />
+
       </Routes>
     </BrowserRouter>
   );

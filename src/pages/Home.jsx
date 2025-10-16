@@ -3,13 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { API } from "../config";
 
 export default function Home() {
+  
   const [userName, setUserName] = useState("");
   const [disenos, setDisenos] = useState([]);
+  const [cita, setCita] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
-  const cita = null;
 
   useEffect(() => {
+    console.log("✅ useEffect ejecutado");
+
     const fetchUserData = async () => {
       const session = JSON.parse(localStorage.getItem("session"));
       if (!session || !session.user?.id) {
@@ -18,23 +21,37 @@ export default function Home() {
       }
 
       try {
-        const res = await fetch(
-          `${API}/user/get_user_name/${session.user.id}`
-        );
+        // 🟦 Obtener nombre del usuario
+        const res = await fetch(`${API}/user/get_user_name/${session.user.id}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Error al obtener usuario");
-
         setUserName(data.nombre);
 
-        const resDisenos = await fetch(
-          `${API}/diseno/get_disenos`
-        );
+        // 🟩 Obtener diseños
+        const resDisenos = await fetch(`${API}/diseno/get_disenos`);
         const dataDisenos = await resDisenos.json();
-        if (!resDisenos.ok) throw new Error(dataDisenos.detail || "Error al obtener diseños");
-
+        if (!resDisenos.ok)
+          throw new Error(dataDisenos.detail || "Error al obtener diseños");
         setDisenos(dataDisenos.disenos);
+
+        // 🟢 Obtener agendamiento próximo
+        const resCita = await fetch(`${API}/agendamiento/agendamiento_proximo`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario_id: session.user.id }),
+        });
+
+        const dataCita = await resCita.json();
+        console.log("Cita próxima:", dataCita);
+
+        if (resCita.ok && dataCita.agendamiento) {
+          const { fecha, hora } = dataCita.agendamiento;
+          setCita(`${fecha} a las ${hora}`);
+        } else {
+          setCita(null); // No hay cita
+        }
       } catch (err) {
-        console.error(err);
+        console.error("❌ Error en Home:", err);
       }
     };
 
@@ -46,10 +63,18 @@ export default function Home() {
       {/* Sidebar (desktop) */}
       <aside className="hidden md:flex w-64 bg-gradient-to-b from-blue-600 to-blue-800 text-white p-6 flex-col gap-4 shadow-lg">
         <h2 className="text-2xl font-bold mb-8 tracking-wide">Menú</h2>
-        <button className="bg-white text-blue-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition">
-          Perfil
-        </button>
-        <button className="bg-white text-blue-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition">
+        <button onClick={() => {
+                
+                navigate("/perfil");
+              }}
+              className="bg-white text-blue-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition">
+              Perfil
+            </button>
+        <button className="bg-white text-blue-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition"
+        onClick={() => {
+                
+                navigate("/historial");
+              }}>
           Historial
         </button>
         <button
@@ -66,13 +91,20 @@ export default function Home() {
 
       {/* Sidebar móvil */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setSidebarOpen(false)}>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        >
           <aside
             className="absolute left-0 top-0 h-full w-64 bg-gradient-to-b from-blue-600 to-blue-800 text-white p-6 flex flex-col gap-4 shadow-lg z-50"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-2xl font-bold mb-8 tracking-wide">Menú</h2>
-            <button className="bg-white text-blue-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition">
+            <button onClick={() => {
+                
+                navigate("/perfil");
+              }}
+              className="bg-white text-blue-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition">
               Perfil
             </button>
             <button className="bg-white text-blue-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition">
@@ -107,7 +139,8 @@ export default function Home() {
 
         {/* Encabezado */}
         <h1 className="hidden md:block text-2xl sm:text-3xl md:text-4xl font-extrabold mb-6 text-gray-800">
-          Bienvenido, <span className="text-blue-600">{userName || "Cargando..."}</span>
+          Bienvenido,{" "}
+          <span className="text-blue-600">{userName || "Cargando..."}</span>
         </h1>
 
         {/* Cita */}
@@ -139,7 +172,9 @@ export default function Home() {
                 className="w-full h-40 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div className="p-4 sm:p-5">
-                <p className="text-lg sm:text-xl font-bold text-gray-800 mb-2">{d.nombre}</p>
+                <p className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+                  {d.nombre}
+                </p>
                 <p className="text-sm text-gray-600">{d.descripcion}</p>
               </div>
             </div>
