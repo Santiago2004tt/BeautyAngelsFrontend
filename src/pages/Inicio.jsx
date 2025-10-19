@@ -16,7 +16,7 @@ export default function Home() {
           Login Usuario
         </button>
         <button 
-          onClick={() => navigate("/login")} 
+          onClick={() => navigate("/login_admin")} 
           className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg transition"
         >
           Login Admin
