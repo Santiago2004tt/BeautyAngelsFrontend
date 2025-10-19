@@ -28,7 +28,7 @@ export default function Login() {
     localStorage.setItem("session", JSON.stringify(data.session));
     sessionStorage.setItem("access_token", data.session.access_token);
 
-    navigate("/validacion"); // redirigir al Home
+    navigate("/home"); // redirigir al Home
   };
 
   return (

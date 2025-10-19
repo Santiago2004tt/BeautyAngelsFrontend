@@ -31,7 +31,7 @@ export default function LoginAdmin() {
       localStorage.setItem("session_admin", JSON.stringify(data.session));
       sessionStorage.setItem("access_token", data.session.access_token);
 
-      navigate("/validacion_admin");
+      navigate("/admin_panel"); // redirigir al panel de admin
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       alert("Error de conexión con el servidor");

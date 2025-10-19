@@ -16,7 +16,7 @@ export default function Home() {
     const fetchUserData = async () => {
       const session = JSON.parse(localStorage.getItem("session"));
       if (!session || !session.user?.id) {
-        navigate("/login");
+        navigate("/");
         return;
       }
 
@@ -81,7 +81,7 @@ export default function Home() {
           onClick={() => {
             localStorage.removeItem("session");
             sessionStorage.removeItem("session");
-            navigate("/login");
+            navigate("/");
           }}
           className="bg-red-500 hover:bg-red-600 py-2 rounded-lg font-medium transition mt-auto"
         >

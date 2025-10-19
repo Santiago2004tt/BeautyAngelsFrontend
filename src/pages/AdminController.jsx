@@ -16,6 +16,11 @@ export default function AdminPanel() {
   // AGENDAMIENTOS
   // =============================
   const obtenerAgendamientos = async () => {
+    const session = JSON.parse(localStorage.getItem("session_admin"));
+      if (!session || !session.user?.id) {
+        navigate("/");
+        return;
+      }
     try {
       setLoading(true);
       setMensaje("");
@@ -31,6 +36,7 @@ export default function AdminPanel() {
       setLoading(false);
     }
   };
+  
 
   const obtenerPendientes = async () => {
     try {
