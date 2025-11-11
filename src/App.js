@@ -11,6 +11,8 @@ import LoginAdmin from "./pages/LoginAdmin";
 import AdminController from "./pages/AdminController";
 import DetalleAgendamientoAdmin from "./pages/DetalleAgendamiento";
 import ValidacionAdmin from "./pages/ValidarAdmin";
+import Confirmation from "./pages/Confirm";
+
 
 
 export default function App() {
@@ -29,6 +31,7 @@ export default function App() {
         <Route path="/admin_panel" element={<AdminController />} />
         <Route path="/admin/agendamiento/:id" element={<DetalleAgendamientoAdmin />} />
         <Route path="/validacion_admin" element={<ValidacionAdmin />} />
+        <Route path="/confirm" element={<Confirmation />} />
 
       </Routes>
     </BrowserRouter>
